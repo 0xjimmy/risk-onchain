@@ -1,10 +1,11 @@
 import { batch, computed, signal } from "@preact/signals"
+import { fromHex, keccak256, toHex } from "viem"
 
 export type GameState = {
   tileOwners: [0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2],
   tilePop: [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint],
   seedNonces: [bigint, bigint, bigint],
-  currentTurnId: number
+  currentTurnId: 0 | 1 | 2
 }
 
 export type Actions = {
@@ -19,7 +20,7 @@ export type Actions = {
 //   seedNonces: [0n, 0n, 0n],
 //   currentTurnId: 0
 // }
-export const startState = signal<GameState>(createGame())
+export const startState = signal<GameState>(createGame(true))
 export const currentState = signal<GameState>(startState.value)
 export const currentActions = signal<Actions>({ placements: [], attacks: [] })
 
@@ -61,7 +62,7 @@ export const remainingDeploy = computed(() => turnNewPop.value - Number(currentA
 // - Tile data
 // - player randomnes seeds 
 // - clear turn actions 
-export function createGame() {
+export function createGame(init: boolean = false) {
   const makePopAmounts = (o: 0 | 1 | 2): [bigint, 0 | 1 | 2][] => [[1n, o], [1n, o], [1n, o], [1n, o], [2n, o], [2n, o], [2n, o], [3n, o], [3n, o], [3n, o], [3n, o], [4n, o], [4n, o], [5n, o]]
   const allPopulatedWithoutTile = [...makePopAmounts(0), ...makePopAmounts(1), ...makePopAmounts(2)]
   const newState: GameState = {
@@ -75,6 +76,7 @@ export function createGame() {
     newState.tilePop[index] = allPopulatedWithoutTile[itemIndex][0]
     newState.tileOwners[index] = allPopulatedWithoutTile[itemIndex][1]
   }
+  if (init) return newState
   batch(() => {
     startState.value = newState
     currentState.value = newState
@@ -95,13 +97,27 @@ export function deployTroops(location: number, amount: bigint) {
 }
 
 function rollForUser(user: 0 | 1 | 2): bigint {
-
+  const hashes = currentState.value.seedNonces[user] + 1n
+  currentState.value.seedNonces[user] += 1n
+  currentState.value = currentState.value
+  let result = keccak256(toHex(secretSeeds.value[user], { size: 32 }), 'hex')
+  if (hashes > 1n) {
+    for (let i = 1n; i < hashes; i++) {
+      result = keccak256(result)
+    }
+  }
+  return fromHex(result, 'bigint')
 }
 
-export function attack(location: number, amount: bigint) {
+export function attack(from: number, where: number) {
+  let newAttackerTroops = rollForUser(currentState.value.currentTurnId) % (currentState.value.tilePop[from] - 1n)
+  let newDefenderTroops = rollForUser(currentState.value.currentTurnId) % currentState.value.tilePop[where]
+  const min = newAttackerTroops < newDefenderTroops ? newAttackerTroops : newDefenderTroops
+  newAttackerTroops -= min
+  newDefenderTroops -= min
+
   batch(() => {
-    // currentState.value.tilePop[location] += amount;
-    // currentState.value = currentState.value
-    // currentActions.value = { attacks: currentActions.value.attacks, placements: [...currentActions.value.placements, { where: location, amount }] }
+    currentState.value.tilePop[from] = 1n
+    currentState.value.tilePop[where] = 1n
   })
 }
