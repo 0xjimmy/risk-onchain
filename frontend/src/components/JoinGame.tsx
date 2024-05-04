@@ -31,9 +31,5 @@ export const JoinGame = () => {
       <CardFooter className="flex justify-end">
         <Button>Create</Button>
       </CardFooter>
-      {/* <CardFooter className="flex justify-between"> */}
-      {/*   <Button variant="outline">Cancel</Button> */}
-      {/*   <Button>Create</Button> */}
-      {/* </CardFooter> */}
     </Card>)
 }

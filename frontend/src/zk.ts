@@ -1,7 +1,7 @@
 import circuit from '../../risk-noir-prover/target/risk_game.json';
 import { BarretenbergBackend, CompiledCircuit } from '@noir-lang/backend_barretenberg';
 import { Noir, keccak256 } from '@noir-lang/noir_js';
-import { GameState, currentState, startState } from './engine/state';
+import { GameState, currentActions, currentState, startState } from './engine/state';
 import { bytesToHex, numberToBytes } from 'viem';
 
 const setup = async () => {
@@ -35,15 +35,23 @@ function generateZKStates(start: GameState, end: GameState) {
   }
 }
 
+function resizeArray(arr: number[], targetLength: number, defaultValue = 50) {
+  const newArr = [...arr];
+  while (newArr.length < targetLength) {
+    newArr.push(defaultValue);
+  }
+  return newArr;
+}
+
 function makeInput() {
   const proofInput = {
     // Start and end states
     ...generateZKStates(startState.value, currentState.value),
     actions: {
-      placeAmounts: [0, 0, 0, 0, 0, 0],
-      placeLocations: [50, 50, 50, 50, 50, 50],
-      attackFrom: [50, 50, 50, 50, 50, 50],
-      attackTargets: [50, 50, 50, 50, 50, 50]
+      placeAmounts: resizeArray(currentActions.value.placements.map(x => Number(x.amount)), 6, 0),
+      placeLocations: resizeArray(currentActions.value.placements.map(x => x.where), 6, 50),
+      attackFrom: resizeArray(currentActions.value.attacks.map(x => x.from), 6, 50),
+      attackTargets: resizeArray(currentActions.value.attacks.map(x => x.to), 6, 50),
     },
     seedHash: Array.from(keccak256(numberToBytes(100))),
   }

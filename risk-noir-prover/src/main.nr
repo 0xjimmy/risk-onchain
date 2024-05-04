@@ -72,10 +72,10 @@ struct Actions {
 }
 
 fn main(
-    startState: pub GameState,
+    startState: GameState,
     endState: pub GameState,
-    actions: pub Actions,
-    seedHash: pub [u8; 32]
+    actions: Actions,
+    seedHash: [u8; 32]
 ) {
     // Make sure states have values without bounds of player counts
     validOwnerIds(startState.tileOwners);
@@ -85,23 +85,23 @@ fn main(
     // Create local gamestate to use for stepping through each action
     let mut state: GameState = startState;
 
-    validatePlacements(&mut state, actions);
-    doPlacements(&mut state, actions);
-
-    doAttacks(&mut state, actions, seedHash);
-
-    // @TODO
-    // Is Win Condition??
-    // If Win endState player should === startState player, otherwise next player
-
-    // Does computed state == expectedState
-    for i in 0..42 {
-        assert(state.tilePop[i] == endState.tilePop[i]);
-        assert(state.tileOwners[i] == endState.tileOwners[i]);
-    }
-    for i in 0..3 {
-        assert(state.seedNonces[i] == endState.seedNonces[i]);
-    }
+  validatePlacements(&mut state, actions);
+  doPlacements(&mut state, actions);
+  
+  doAttacks(&mut state, actions, seedHash);
+  
+  //// @TODO
+  //// Is Win Condition??
+  //// If Win endState player should === startState player, otherwise next player
+ 
+  // Does computed state == expectedState
+  for i in 0..42 {
+      assert(state.tilePop[i] == endState.tilePop[i]);
+      assert(state.tileOwners[i] == endState.tileOwners[i]);
+  }
+  for i in 0..3 {
+      assert(state.seedNonces[i] == endState.seedNonces[i]);
+  }
 }
 
 fn validOwnerIds(tiles: [u8; 42]) {
@@ -113,7 +113,7 @@ fn validOwnerIds(tiles: [u8; 42]) {
 fn validatePlacements(state: &mut GameState, actions: Actions) {
     let maxPlacements = getNewPopCount(*state);
     // Need to make sure we account for less than max actions for both amounts and locations
-    assert(actions.placeAmounts.fold(0, |a, b| a + b) == maxPlacements);
+    assert(actions.placeAmounts.fold(0, |a, b| a + b) <= maxPlacements);
 }
 
 fn doPlacements(state: &mut GameState, actions: Actions) {
