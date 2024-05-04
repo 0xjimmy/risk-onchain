@@ -88,7 +88,7 @@ fn main(
     //validatePlacements(&mut state, actions);
     //doPlacements(&mut state, actions);
 
-    doAttacks(&mut state, actions, seedHash);
+    //doAttacks(&mut state, actions, seedHash);
 
     // @TODO
     // Is Win Condition??
