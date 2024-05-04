@@ -15,7 +15,8 @@
     "lucide-react": "^0.378.0",
     "preact": "^10.19.6",
     "tailwindcss-animate": "^1.0.7",
-    "viem": "^2.9.31"
+    "viem": "^2.9.31",
+    "wagmi": "^2.8.1"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.8.2",

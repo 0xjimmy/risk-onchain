@@ -113,7 +113,7 @@ fn validOwnerIds(tiles: [u8; 42]) {
 fn validatePlacements(state: &mut GameState, actions: Actions) {
     let maxPlacements = getNewPopCount(*state);
     // Need to make sure we account for less than max actions for both amounts and locations
-    assert(actions.placeAmounts.fold(0, |a, b| a + b) == maxPlacements);
+    assert(actions.placeAmounts.fold(0, |a, b| a + b) <= maxPlacements);
 }
 
 fn doPlacements(state: &mut GameState, actions: Actions) {
