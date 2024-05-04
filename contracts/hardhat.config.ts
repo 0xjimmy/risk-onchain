@@ -3,11 +3,11 @@ import "@nomicfoundation/hardhat-toolbox-viem";
 
 const config: HardhatUserConfig = {
   solidity: {
-    version: "0.8.24", 
+    version: "0.8.4",
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200, 
+        runs: 200,
       }
     }
   },
@@ -21,8 +21,8 @@ const config: HardhatUserConfig = {
     base: {
       url: 'wss://base-rpc.publicnode.com'
     }
-    }
-  
+  }
+
 
 };
 

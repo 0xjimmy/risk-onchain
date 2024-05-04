@@ -2,7 +2,7 @@ import circuit from '../../risk-noir-prover/target/risk_game.json';
 import { BarretenbergBackend, CompiledCircuit } from '@noir-lang/backend_barretenberg';
 import { Noir, keccak256 } from '@noir-lang/noir_js';
 import { GameState, currentState, startState } from './engine/state';
-import { numberToBytes } from 'viem';
+import { bytesToHex, numberToBytes } from 'viem';
 
 const setup = async () => {
   await Promise.all([
@@ -60,7 +60,10 @@ export async function doZK() {
     const noir = new Noir(circuit as CompiledCircuit, backend);
 
     const proof = await noir.generateProof(input);
-    console.log('results', proof.proof);
+    console.log("PROOF")
+    console.log(bytesToHex(proof.proof));
+    console.log("INPUTS")
+    console.log(proof.publicInputs);
     const verification = await noir.verifyProof(proof);
     console.log('verification:', verification)
   } catch (e) {
