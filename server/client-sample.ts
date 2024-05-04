@@ -1,7 +1,7 @@
 import WebSocket from 'ws';
 
 const gameId = 'game123';
-const address = '0xvitalikisgay';
+const address = '0xfakewallet';
 const ws = new WebSocket(`ws://localhost:8080/?gameId=${gameId}&address=${address}`);
 
 ws.on('open', () => {

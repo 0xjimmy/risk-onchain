@@ -86,13 +86,13 @@ export function createGame(init: boolean = false) {
 
 
 export function deployTroops(location: number, amount: bigint) {
-  batch(() => {
     if ((currentState.value.currentTurnId === currentState.value.tileOwners[location])) {
-      currentState.value.tilePop[location] += amount;
-      currentState.value = currentState.value
+      const tilePop = currentState.value.tilePop;
+      tilePop[location] += amount;
+      currentState.value = { ...currentState.value, tilePop }
       currentActions.value = { attacks: currentActions.value.attacks, placements: [...currentActions.value.placements, { where: location, amount }] }
     }
-  })
+    //console.log("current state tile pop after " + currentState.value.tilePop[location])
 }
 
 function rollForUser(user: 0 | 1 | 2): bigint {
@@ -115,8 +115,26 @@ export function attack(from: number, where: number) {
   newAttackerTroops -= min
   newDefenderTroops -= min
 
-  batch(() => {
-    currentState.value.tilePop[from] = 1n
-    currentState.value.tilePop[where] = 1n
-  })
+  
+  if (newAttackerTroops == newDefenderTroops) { // tie
+    const tilePop = currentState.value.tilePop;
+    tilePop[where] = 1n; // defender left with 1
+    currentState.value = { ...currentState.value, tilePop }
+  } else if (newAttackerTroops > newDefenderTroops) { // attacker wins
+    const tileOwners = currentState.value.tileOwners;
+    tileOwners[where] = tileOwners[from]; // attacker claims where
+    currentState.value = { ...currentState.value, tileOwners }
+
+    const tilePop = currentState.value.tilePop;
+    tilePop[where] = newAttackerTroops; // attacker moves troops
+    currentState.value = { ...currentState.value, tilePop }
+  } else { // defender wins
+    const tilePop = currentState.value.tilePop;
+    tilePop[where] = newDefenderTroops; // defender troops update
+    currentState.value = { ...currentState.value, tilePop }
+  }
+
+  const tilePop = currentState.value.tilePop;
+  tilePop[from] = 1n; // attacker always left with 1
+  currentState.value = { ...currentState.value, tilePop }
 }
