@@ -13,7 +13,7 @@ const config: HardhatUserConfig = {
   },
   networks: {
     mantleSepolia: {
-      url: 'https://rpc.sepolia.mantle.xyz'
+      url: 'https://rpc.sepolia.mancdtle.xyz'
     },
     polygonCardona: {
       url: 'https://rpc.cardona.zkevm-rpc.com'
