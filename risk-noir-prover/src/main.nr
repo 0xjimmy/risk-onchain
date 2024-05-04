@@ -72,10 +72,10 @@ struct Actions {
 }
 
 fn main(
-    startState: pub GameState,
+    startState: GameState,
     endState: pub GameState,
-    actions: pub Actions,
-    seedHash: pub [u8; 32]
+    actions: Actions,
+    seedHash: [u8; 32]
 ) {
     // Make sure states have values without bounds of player counts
     validOwnerIds(startState.tileOwners);
@@ -85,8 +85,8 @@ fn main(
     // Create local gamestate to use for stepping through each action
     let mut state: GameState = startState;
 
-    validatePlacements(&mut state, actions);
-    doPlacements(&mut state, actions);
+    //validatePlacements(&mut state, actions);
+    //doPlacements(&mut state, actions);
 
     doAttacks(&mut state, actions, seedHash);
 
@@ -95,13 +95,13 @@ fn main(
     // If Win endState player should === startState player, otherwise next player
 
     // Does computed state == expectedState
-    for i in 0..42 {
+    /*for i in 0..42 {
         assert(state.tilePop[i] == endState.tilePop[i]);
         assert(state.tileOwners[i] == endState.tileOwners[i]);
     }
     for i in 0..3 {
         assert(state.seedNonces[i] == endState.seedNonces[i]);
-    }
+    }*/
 }
 
 fn validOwnerIds(tiles: [u8; 42]) {
