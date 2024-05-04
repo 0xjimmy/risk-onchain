@@ -3,6 +3,7 @@ import Board from './Board'
 
 import { CreateGame } from './components/CreateGame'
 import { JoinGame } from './components/JoinGame'
+import { TurnSelection } from './components/TurnSelection'
 import { game } from './state/game'
 
 
@@ -18,6 +19,7 @@ export function App() {
       }
       {game.value ? (
         <div class="w-screen min-h-screen h-full flex items-center justify-center gap-4">
+          <TurnSelection />
           <Board />
         </div>) : null
       }
