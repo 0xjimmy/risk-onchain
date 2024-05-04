@@ -19,6 +19,9 @@ export function createLobby() {
   // Create starting state
   // Get ID
   // Submit request to create lobby
+  // @TODO: Do on chain
+  const gameId = BigInt(Math.floor(Math.random() * 1000))
+  const userAddress = privateKeyToAddress(generatePrivateKey())
 
   game.value = {
     gameId,
