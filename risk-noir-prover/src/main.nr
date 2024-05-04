@@ -71,31 +71,36 @@ struct Actions {
     attackTargets: [u8; MAX_ATTACKS]
 }
 
-fn main(startState: pub GameState, endState: pub GameState, actions: Actions, seedHashes: pub [[u8; 32]; 3]) {
+fn main(
+    startState: pub GameState,
+    endState: pub GameState,
+    actions: pub Actions,
+    seedHash: pub [u8; 32]
+) {
     // Make sure states have values without bounds of player counts
     validOwnerIds(startState.tileOwners);
     validOwnerIds(endState.tileOwners);
     assert(startState.currentTurnId < PLAYER_COUNT);
-    
+
     // Create local gamestate to use for stepping through each action
     let mut state: GameState = startState;
 
     validatePlacements(&mut state, actions);
     doPlacements(&mut state, actions);
 
-    doAttacks(&mut state, actions, seedHashes);
-   
+    doAttacks(&mut state, actions, seedHash);
+
     // @TODO
     // Is Win Condition??
     // If Win endState player should === startState player, otherwise next player
 
     // Does computed state == expectedState
     for i in 0..42 {
-      assert(state.tilePop[i] == endState.tilePop[i]);
-      assert(state.tileOwners[i] == endState.tileOwners[i]);
+        assert(state.tilePop[i] == endState.tilePop[i]);
+        assert(state.tileOwners[i] == endState.tileOwners[i]);
     }
     for i in 0..3 {
-      assert(state.seedNonces[i] == endState.seedNonces[i]);
+        assert(state.seedNonces[i] == endState.seedNonces[i]);
     }
 }
 
@@ -119,7 +124,7 @@ fn doPlacements(state: &mut GameState, actions: Actions) {
         } else {
             // Ensure placing on owned tiles
             assert(state.tileOwners[actions.placeLocations[i]] == state.currentTurnId);
-            state.tilePop[actions.placeLocations[i]] = state.tilePop[actions.placeLocations[i]] + actions.placeAmounts[i]; 
+            state.tilePop[actions.placeLocations[i]] = state.tilePop[actions.placeLocations[i]] + actions.placeAmounts[i];
         }
     }
 }
@@ -152,7 +157,7 @@ fn getNewPopCount(state: GameState) -> u32 {
             tilesOwned = tilesOwned + 1;
             euOwned = euOwned + 1;
         }
-    }    
+    }
     // AF
     for i in 20..25 {
         if state.tileOwners[i] == state.currentTurnId {
@@ -211,8 +216,8 @@ fn getNewPopCount(state: GameState) -> u32 {
     regular + bonus
 }
 
-unconstrained fn rollForUser(seeds: [[u8; 32]; 3], state: GameState) -> u32 {
-    let mut startHash = std::hash::keccak256(seeds[state.currentTurnId], 32);
+unconstrained fn rollForUser(seed: [u8; 32], state: GameState) -> u32 {
+    let mut startHash = std::hash::keccak256(seed, 32);
 
     for _ in 1..state.seedNonces[state.currentTurnId] {
         startHash = std::hash::keccak256(startHash, 32);
@@ -228,9 +233,9 @@ unconstrained fn rollForUser(seeds: [[u8; 32]; 3], state: GameState) -> u32 {
     x
 }
 
-fn doAttacks(state: &mut GameState, actions: Actions, seeds: [[u8; 32]; 3]) {
+fn doAttacks(state: &mut GameState, actions: Actions, seed: [u8; 32]) {
     for i in 0..5 {
-       if (actions.attackFrom[i] < 42) {
+        if (actions.attackFrom[i] < 42) {
             if (actions.attackTargets[i] < 42) {
                 // Ownership
                 assert(state.tileOwners[actions.attackFrom[i]] == state.currentTurnId);
@@ -238,30 +243,34 @@ fn doAttacks(state: &mut GameState, actions: Actions, seeds: [[u8; 32]; 3]) {
 
                 // Is Adjacent
                 assert(TILE_NEIGHBOURS[actions.attackFrom[i]].any(|a| a == actions.attackTargets[i]));
-  
+
                 state.seedNonces[state.currentTurnId] = state.seedNonces[state.currentTurnId] + 1;
-                let mut newAttackerTroops = rollForUser(seeds, *state) % (state.tilePop[actions.attackFrom[i]] - 1);
+                let mut newAttackerTroops = rollForUser(seed, *state) % (state.tilePop[actions.attackFrom[i]] - 1);
                 state.seedNonces[state.currentTurnId] = state.seedNonces[state.currentTurnId] + 1;
-                let mut newDefenderTroops = rollForUser(seeds, *state) % state.tilePop[actions.attackTargets[i]];
+                let mut newDefenderTroops = rollForUser(seed, *state) % state.tilePop[actions.attackTargets[i]];
                 let mut min: u32 = 0;
-                if (newAttackerTroops < newDefenderTroops) { min = newAttackerTroops; } else { min = newDefenderTroops; }
+                if (newAttackerTroops < newDefenderTroops) {
+                    min = newAttackerTroops;
+                } else {
+                    min = newDefenderTroops;
+                }
                 newAttackerTroops -= min;
                 newDefenderTroops -= min;
 
                 state.tilePop[actions.attackFrom[i]] = 1;
                 if (newAttackerTroops == newDefenderTroops) {
-                  // 1 all, no win
-                  state.tilePop[actions.attackTargets[i]] = 1;
+                    // 1 all, no win
+                    state.tilePop[actions.attackTargets[i]] = 1;
                 } else if (newAttackerTroops > newDefenderTroops) {
-                  // Attacker win
-                  state.tilePop[actions.attackTargets[i]] = newDefenderTroops;
-                  state.tileOwners[actions.attackTargets[i]] = state.currentTurnId;
+                    // Attacker win
+                    state.tilePop[actions.attackTargets[i]] = newDefenderTroops;
+                    state.tileOwners[actions.attackTargets[i]] = state.currentTurnId;
                 } else {
-                  // Attacker lose
-                  state.tilePop[actions.attackTargets[i]] = newDefenderTroops;
+                    // Attacker lose
+                    state.tilePop[actions.attackTargets[i]] = newDefenderTroops;
                 }
+            }
         }
-       }
     }
 }
 

@@ -3,9 +3,9 @@ import Board from './Board'
 
 import { CreateGame } from './components/CreateGame'
 import { JoinGame } from './components/JoinGame'
+import { Button } from './components/ui/Button'
 import { game } from './state/game'
-
-
+import { doZK } from './zk'
 
 export function App() {
   return (
@@ -21,6 +21,7 @@ export function App() {
           <Board />
         </div>) : null
       }
+      <Button onClick={doZK}>ZK Test</Button>
     </>
 
   )

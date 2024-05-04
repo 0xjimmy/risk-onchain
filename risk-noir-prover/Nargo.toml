@@ -1,7 +1,7 @@
 [package]
 name = "risk_game"
 type = "bin"
-authors = [""]
-compiler_version = ">=0.27.0"
+authors = ["0xjimmy"]
+compiler_version = "0.27.0"
 
 [dependencies]

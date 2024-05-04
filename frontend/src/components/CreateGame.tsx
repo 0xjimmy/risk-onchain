@@ -22,7 +22,7 @@ export const CreateGame = () => {
             </div>
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="gameLen">Turn Length</Label>
-              <Select id="gameLen" placeholder="Game Name">
+              <Select onInput={(e) => gameLength.value = Number(e.currentTarget.value)} id="gameLen" placeholder="Game Name">
                 <option value={600}>10 minutes</option>
                 <option value={1800}>30 minutes</option>
                 <option value={14400}>4 hours</option>
