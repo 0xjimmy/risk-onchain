@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@preact/signals": "^1.2.3",
+    "lucide-react": "^0.378.0",
     "preact": "^10.19.6",
+    "tailwindcss-animate": "^1.0.7",
     "viem": "^2.9.31"
   },
   "devDependencies": {
